@@ -1,16 +1,99 @@
 var cart = [];
-
+var currentSearchQuery = "";
 
 window.onload = function () {
+    initTheme();
     renderMenu();
     updateCartDisplay();
+    initReveal();
 };
 
+/* ===== THEME TOGGLE ===== */
+function initTheme() {
+    var savedTheme = localStorage.getItem("tastybite_theme");
+    if (savedTheme === "dark") {
+        document.body.classList.add("dark-theme");
+        document.getElementById("theme-toggle").textContent = "☀️";
+    }
+}
 
+function toggleTheme() {
+    var isDark = document.body.classList.toggle("dark-theme");
+    var btn = document.getElementById("theme-toggle");
+    
+    if (isDark) {
+        localStorage.setItem("tastybite_theme", "dark");
+        btn.textContent = "☀️";
+    } else {
+        localStorage.setItem("tastybite_theme", "light");
+        btn.textContent = "🌙";
+    }
+}
+
+/* ===== SCROLL REVEAL (INTERSECTION OBSERVER) ===== */
+function initReveal() {
+    var reveals = document.querySelectorAll('.reveal');
+    var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    reveals.forEach(function(reveal) {
+        observer.observe(reveal);
+    });
+}
+
+function reObserveElements() {
+    // Call this after dynamically adding new elements (like menu cards)
+    setTimeout(function() {
+        var newReveals = document.querySelectorAll('.menu-category.reveal:not(.active), .menu-card.reveal:not(.active)');
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        newReveals.forEach(function(reveal) {
+            observer.observe(reveal);
+        });
+    }, 100);
+}
+
+
+/* ===== SEARCH ===== */
+function handleSearch() {
+    currentSearchQuery = document.getElementById("menu-search").value.toLowerCase().trim();
+    renderMenu();
+}
+
+
+/* ===== MENU RENDERING ===== */
 function renderMenu() {
     var container = document.getElementById("menu-items");
     container.innerHTML = "";
     var items = getMenuItems();
+
+    // Filter items if search query exists
+    if (currentSearchQuery !== "") {
+        var filtered = [];
+        for (var i = 0; i < items.length; i++) {
+            if (items[i].name.toLowerCase().indexOf(currentSearchQuery) > -1 || 
+                items[i].description.toLowerCase().indexOf(currentSearchQuery) > -1) {
+                filtered.push(items[i]);
+            }
+        }
+        items = filtered;
+        
+        if (items.length === 0) {
+            container.innerHTML = '<p style="text-align:center; padding: 40px; color:#888;">No items match your search.</p>';
+            return;
+        }
+    }
 
     for (var c = 0; c < categoryOrder.length; c++) {
         var cat = categoryOrder[c];
@@ -25,7 +108,7 @@ function renderMenu() {
         if (catItems.length === 0) continue;
 
         var section = document.createElement("div");
-        section.className = "menu-category";
+        section.className = "menu-category reveal";
         section.id = "cat-" + cat;
 
         var heading = document.createElement("h3");
@@ -39,7 +122,7 @@ function renderMenu() {
         for (var i = 0; i < catItems.length; i++) {
             var item = catItems[i];
             var card = document.createElement("div");
-            card.className = "menu-card";
+            card.className = "menu-card reveal";
             card.innerHTML =
                 '<img src="' + item.image + '" alt="' + item.name + '">' +
                 '<div class="card-info">' +
@@ -56,6 +139,8 @@ function renderMenu() {
         section.appendChild(grid);
         container.appendChild(section);
     }
+    
+    reObserveElements();
 }
 
 
@@ -67,6 +152,7 @@ function scrollToCategory(categoryId) {
 }
 
 
+/* ===== CART LOGIC ===== */
 function addToCart(itemId) {
     var items = getMenuItems();
     var item = null;
@@ -171,18 +257,67 @@ function updateCartDisplay() {
 }
 
 
+/* ===== FORM VALIDATION HELPERS ===== */
+function showError(inputId, message) {
+    var input = document.getElementById(inputId);
+    var errorSpan = document.getElementById("error-" + inputId);
+    input.classList.add("input-error");
+    if (errorSpan) {
+        errorSpan.textContent = message;
+        errorSpan.classList.add("active");
+    }
+}
+
+function clearErrors(formId) {
+    var form = document.getElementById(formId);
+    var inputs = form.querySelectorAll("input, textarea");
+    var errors = form.querySelectorAll(".error-text");
+    
+    for (var i = 0; i < inputs.length; i++) {
+        inputs[i].classList.remove("input-error");
+    }
+    for (var j = 0; j < errors.length; j++) {
+        errors[j].classList.remove("active");
+        errors[j].textContent = "";
+    }
+}
+
+
+/* ===== FORM HANDLERS ===== */
 function handleOrderSubmit(event) {
     event.preventDefault();
+    clearErrors("order-form");
 
     if (cart.length === 0) {
         showPopup("Your cart is empty. Please add items before placing an order.");
         return;
     }
 
-    var name = document.getElementById("order-name").value;
-    var phone = document.getElementById("order-phone").value;
-    var address = document.getElementById("order-address").value;
-    var notes = document.getElementById("order-notes").value;
+    var name = document.getElementById("order-name").value.trim();
+    var phone = document.getElementById("order-phone").value.trim();
+    var address = document.getElementById("order-address").value.trim();
+    var notes = document.getElementById("order-notes").value.trim();
+    
+    var isValid = true;
+
+    if (name.length < 2) {
+        showError("order-name", "Please enter a valid full name.");
+        isValid = false;
+    }
+    
+    // Basic phone validation (at least 7 numbers/characters to account for formatting)
+    var phoneRegex = /^[\d\s\+\-\(\)]{7,20}$/;
+    if (!phoneRegex.test(phone)) {
+        showError("order-phone", "Please enter a valid phone number.");
+        isValid = false;
+    }
+    
+    if (address.length < 10) {
+        showError("order-address", "Please provide a complete delivery address.");
+        isValid = false;
+    }
+    
+    if (!isValid) return; // Stop if validation failed
 
     var orderData = {
         customer: name,
@@ -206,10 +341,32 @@ function handleOrderSubmit(event) {
 
 function handleContactSubmit(event) {
     event.preventDefault();
+    clearErrors("contact-form");
 
-    var name = document.getElementById("contact-name").value;
-    var email = document.getElementById("contact-email").value;
-    var message = document.getElementById("contact-message").value;
+    var name = document.getElementById("contact-name").value.trim();
+    var email = document.getElementById("contact-email").value.trim();
+    var message = document.getElementById("contact-message").value.trim();
+    
+    var isValid = true;
+    
+    if (name.length < 2) {
+        showError("contact-name", "Please enter your name.");
+        isValid = false;
+    }
+    
+    // Basic email validation
+    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showError("contact-email", "Please enter a valid email address.");
+        isValid = false;
+    }
+    
+    if (message.length < 10) {
+        showError("contact-message", "Your message must be at least 10 characters long.");
+        isValid = false;
+    }
+
+    if (!isValid) return;
 
     var contactData = {
         name: name,
@@ -226,6 +383,7 @@ function handleContactSubmit(event) {
 }
 
 
+/* ===== POPUPS AND TOASTS ===== */
 function showPopup(message) {
     document.getElementById("popup-icon").innerHTML = "&#10003;";
     document.getElementById("popup-title").textContent = "Success";
@@ -237,7 +395,6 @@ function closePopup(event) {
     if (event && event.target !== document.getElementById("popup")) return;
     document.getElementById("popup").classList.remove("show");
 }
-
 
 function showToast(message) {
     var existing = document.querySelector(".toast");
@@ -254,6 +411,7 @@ function showToast(message) {
 }
 
 
+/* ===== UTILS ===== */
 function scrollToOrder() {
     document.getElementById("order").scrollIntoView({ behavior: "smooth" });
 }
@@ -261,7 +419,6 @@ function scrollToOrder() {
 function toggleMobileMenu() {
     document.getElementById("nav-links").classList.toggle("open");
 }
-
 
 window.onscroll = function () {
     var navbar = document.getElementById("navbar");
