@@ -13,7 +13,7 @@ function initTheme() {
     var savedTheme = localStorage.getItem("tastybite_theme");
     if (savedTheme === "dark") {
         document.body.classList.add("dark-theme");
-        document.getElementById("theme-toggle").textContent = "☀️";
+        document.getElementById("theme-toggle").innerHTML = "&#9788;";
     }
 }
 
@@ -23,10 +23,10 @@ function toggleTheme() {
     
     if (isDark) {
         localStorage.setItem("tastybite_theme", "dark");
-        btn.textContent = "☀️";
+        btn.innerHTML = "&#9788;";
     } else {
         localStorage.setItem("tastybite_theme", "light");
-        btn.textContent = "🌙";
+        btn.innerHTML = "&#9790;";
     }
 }
 
