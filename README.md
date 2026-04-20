@@ -53,4 +53,4 @@ Open `admin.html` for the admin dashboard.
 - Connect to a database (MySQL/MongoDB) to persist orders and messages
 - User authentication with encrypted passwords
 - Order tracking system
-- Payment integration
+
