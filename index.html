@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TastyBite - Fine Food Delivered</title>
-    <meta name="description" content="Order premium meals from TastyBite. Fresh burgers, artisan pizza, craft drinks and handmade desserts.">
+    <meta name="description" content="Order premium meals from TastyBite. Fresh burgers, artisan pizza, handmade pasta, and craft desserts.">
     <link rel="stylesheet" href="css/main.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 </head>
@@ -36,6 +36,28 @@
     </section>
 
 
+    <section class="features-strip">
+        <div class="features-grid">
+            <div class="feature-item">
+                <span class="feature-number">30</span>
+                <span class="feature-label">Minute Delivery</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-number">30+</span>
+                <span class="feature-label">Menu Items</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-number">4.9</span>
+                <span class="feature-label">Star Rating</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-number">2K+</span>
+                <span class="feature-label">Happy Customers</span>
+            </div>
+        </div>
+    </section>
+
+
     <section id="menu">
         <div class="section-header">
             <h2>Our Menu</h2>
@@ -43,15 +65,17 @@
             <div class="section-divider"></div>
         </div>
 
-        <div class="category-buttons">
-            <button class="category-btn active" onclick="filterMenu('all', this)">All</button>
-            <button class="category-btn" onclick="filterMenu('burgers', this)">Burgers</button>
-            <button class="category-btn" onclick="filterMenu('pizza', this)">Pizza</button>
-            <button class="category-btn" onclick="filterMenu('drinks', this)">Drinks</button>
-            <button class="category-btn" onclick="filterMenu('desserts', this)">Desserts</button>
+        <div class="category-nav" id="category-nav">
+            <a href="#cat-starters" onclick="scrollToCategory('cat-starters'); return false;">Starters</a>
+            <a href="#cat-burgers" onclick="scrollToCategory('cat-burgers'); return false;">Burgers</a>
+            <a href="#cat-pizza" onclick="scrollToCategory('cat-pizza'); return false;">Pizza</a>
+            <a href="#cat-pasta" onclick="scrollToCategory('cat-pasta'); return false;">Pasta</a>
+            <a href="#cat-sides" onclick="scrollToCategory('cat-sides'); return false;">Sides</a>
+            <a href="#cat-drinks" onclick="scrollToCategory('cat-drinks'); return false;">Drinks</a>
+            <a href="#cat-desserts" onclick="scrollToCategory('cat-desserts'); return false;">Desserts</a>
         </div>
 
-        <div id="menu-items" class="menu-grid"></div>
+        <div id="menu-items" class="menu-items-container"></div>
     </section>
 
 

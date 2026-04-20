@@ -2,54 +2,68 @@ var cart = [];
 
 
 window.onload = function () {
-    renderMenu("all");
+    renderMenu();
     updateCartDisplay();
 };
 
 
-function renderMenu(category) {
+function renderMenu() {
     var container = document.getElementById("menu-items");
     container.innerHTML = "";
-
     var items = getMenuItems();
 
-    if (category !== "all") {
-        var filtered = [];
+    for (var c = 0; c < categoryOrder.length; c++) {
+        var cat = categoryOrder[c];
+
+        var catItems = [];
         for (var i = 0; i < items.length; i++) {
-            if (items[i].category === category) {
-                filtered.push(items[i]);
+            if (items[i].category === cat) {
+                catItems.push(items[i]);
             }
         }
-        items = filtered;
-    }
 
-    for (var i = 0; i < items.length; i++) {
-        var item = items[i];
-        var card = document.createElement("div");
-        card.className = "menu-card";
-        card.innerHTML =
-            '<img src="' + item.image + '" alt="' + item.name + '">' +
-            '<div class="card-info">' +
-            '  <h3>' + item.name + '</h3>' +
-            '  <p class="card-desc">' + item.description + '</p>' +
-            '  <div class="card-bottom">' +
-            '    <span class="price">$' + item.price.toFixed(2) + '</span>' +
-            '    <button class="add-btn" onclick="addToCart(' + item.id + ')">Add to Cart</button>' +
-            '  </div>' +
-            '</div>';
-        container.appendChild(card);
+        if (catItems.length === 0) continue;
+
+        var section = document.createElement("div");
+        section.className = "menu-category";
+        section.id = "cat-" + cat;
+
+        var heading = document.createElement("h3");
+        heading.className = "category-heading";
+        heading.textContent = categoryNames[cat] || cat;
+        section.appendChild(heading);
+
+        var grid = document.createElement("div");
+        grid.className = "menu-grid";
+
+        for (var i = 0; i < catItems.length; i++) {
+            var item = catItems[i];
+            var card = document.createElement("div");
+            card.className = "menu-card";
+            card.innerHTML =
+                '<img src="' + item.image + '" alt="' + item.name + '">' +
+                '<div class="card-info">' +
+                '  <h3>' + item.name + '</h3>' +
+                '  <p class="card-desc">' + item.description + '</p>' +
+                '  <div class="card-bottom">' +
+                '    <span class="price">$' + item.price.toFixed(2) + '</span>' +
+                '    <button class="add-btn" onclick="addToCart(' + item.id + ')">Add to Cart</button>' +
+                '  </div>' +
+                '</div>';
+            grid.appendChild(card);
+        }
+
+        section.appendChild(grid);
+        container.appendChild(section);
     }
 }
 
 
-function filterMenu(category, button) {
-    renderMenu(category);
-
-    var allButtons = document.querySelectorAll(".category-btn");
-    for (var i = 0; i < allButtons.length; i++) {
-        allButtons[i].classList.remove("active");
+function scrollToCategory(categoryId) {
+    var element = document.getElementById(categoryId);
+    if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
     }
-    button.classList.add("active");
 }
 
 
